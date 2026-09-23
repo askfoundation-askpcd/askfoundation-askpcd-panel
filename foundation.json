@@ -1,0 +1,13 @@
+{
+  "project": "AskFoundation",
+  "activeModule": "AskPCDoctor",
+  "modules": [
+    "AskPCDoctor",
+    "AskSolicitor",
+    "AskAccountant",
+    "AskMD",
+    "AskCEO"
+  ],
+  "version": "Rev1.5",
+  "launchDate": "2026-10-01"
+}
