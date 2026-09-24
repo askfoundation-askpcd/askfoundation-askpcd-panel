@@ -1,0 +1,62 @@
+# ============================
+# AskFoundation Rev1.5 .gitignore
+# ============================
+
+# --- Node ---
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Environment variables ---
+.env
+.env.*
+*.env
+
+# --- Logs ---
+logs/
+*.log
+debug.log
+
+# --- OS / Editor junk ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# --- Build artifacts ---
+dist/
+build/
+out/
+tmp/
+temp/
+
+# --- Azure Functions ---
+local.settings.json
+bin/
+obj/
+
+# --- Excel temporary files ---
+~$*.xlsx
+
+# --- Personal / reference files ---
+correct folder structure.PNG
+
+# --- Prevent accidental uploads of large media ---
+Videos/
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# --- Prevent accidental uploads of backups ---
+*.bak
+*.old
+*.backup
+
+# --- Prevent accidental uploads of compiled JS bundles ---
+*.map
+
+# --- Prevent accidental uploads of OS trash ---
+*.swp
+*.swo
