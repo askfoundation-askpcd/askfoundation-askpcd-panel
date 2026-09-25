@@ -1,27 +1,848 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>AskPCDoctor Rev1.5</title>
-  <link rel="stylesheet" href="askpcdoctor.css">
-  <script type="module" src="foundation.js"></script>
-  <script type="module" src="module-switcher.js"></script>
-  <script type="module" src="askpcdoctor.js"></script>
+  <meta charset="UTF-8" />
+  <title>AskPCDoctor – Floating Panel</title>
+  <style>
+    :root {
+      --border-blue: #4af3ff;
+      --bg-white: #ffffff;
+      --text-dark: #111827;
+      --panel-bg: rgba(255,255,255,0.98);
+      --shadow: 0 18px 40px rgba(0,0,0,0.25);
+      --radius: 14px;
+      --font-main: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-main);
+      background: var(--bg-white);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Floating panel: 8cm wide x 15cm high (approx 302 x 567 px) */
+    .floating-panel {
+      position: absolute;
+      top: 80px;
+      left: 80px;
+      width: 302px;
+      height: 567px;
+      background: var(--panel-bg);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      border: 2px solid var(--border-blue);
+      animation: pulse-border 2s infinite;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      z-index: 9999;
+    }
+
+    @keyframes pulse-border {
+      0%   { box-shadow: 0 0 0 0 rgba(74,243,255,0.7); }
+      50%  { box-shadow: 0 0 18px 4px rgba(74,243,255,0.9); }
+      100% { box-shadow: 0 0 0 0 rgba(74,243,255,0.7); }
+    }
+
+    /* Title bar with window controls */
+    .title-bar {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      background: #f3f4f6;
+      border-bottom: 1px solid #e5e7eb;
+      cursor: move;
+    }
+
+    .title-text {
+      font-size: 0.8rem;
+      color: #4b5563;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .win-btn {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+      border: 1px solid #d1d5db;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #4b5563;
+      cursor: pointer;
+      background: #ffffff;
+    }
+
+    .win-btn:hover {
+      background: #e5e7eb;
+    }
+
+    .win-btn.close {
+      color: #b91c1c;
+      border-color: #fecaca;
+    }
+
+    /* Content split: top avatar area (~12cm), bottom message bar (~3cm) */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: #ffffff;
+    }
+
+    .avatar-area {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Portrait image */
+    .avatar-portrait {
+      position: absolute;
+      inset: 0;
+      border-radius: 0;
+      overflow: hidden;
+      background: #e5e7eb;
+    }
+
+    .avatar-portrait img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(0.9);
+      opacity: 0.6;
+    }
+
+    /* Breathing + blinking overlay */
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      animation: breathe 4s infinite;
+    }
+
+    @keyframes breathe {
+      0%   { transform: scale(1); opacity: 1; }
+      50%  { transform: scale(1.02); opacity: 0.95; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .avatar-face {
+      width: 70%;
+      height: 70%;
+      border-radius: 12px;
+      background: radial-gradient(circle at top, rgba(255,255,255,0.9), rgba(148,163,184,0.4));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.05rem;
+      color: #111827;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .avatar-eyes {
+      position: absolute;
+      top: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 18px;
+    }
+
+    .eye {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #111827;
+      animation: blink 6s infinite;
+    }
+
+    @keyframes blink {
+      0%, 92%, 100% { transform: scaleY(1); }
+      94%, 96%      { transform: scaleY(0.1); }
+    }
+
+    .avatar-name-tag {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      color: #374151;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* Flags overlay */
+    .flag-strip {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      pointer-events: auto;
+    }
+
+    .flag-button {
+      width: 80%;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid #4b5563;
+      background: rgba(17,24,39,0.9);
+      color: #f9fafb;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.2s ease;
+    }
+
+    .flag-button span.flag {
+      width: 20px;
+      height: 12px;
+      border-radius: 3px;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.7);
+    }
+
+    .flag-button:hover {
+      transform: translateY(-1px);
+      background: rgba(31,41,55,0.95);
+    }
+
+    .flag-strip.slide-right {
+      animation: flags-slide 0.5s forwards;
+    }
+
+    @keyframes flags-slide {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(40%); }
+    }
+
+    /* Chat + subtitle overlay inside avatar area */
+    .chat-layer {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 8px 10px;
+      pointer-events: none;
+    }
+
+    .chat-window {
+      max-height: 60%;
+      overflow-y: auto;
+      margin-bottom: 6px;
+      pointer-events: auto;
+    }
+
+    .message {
+      max-width: 90%;
+      padding: 6px 8px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      line-height: 1.4;
+      margin-bottom: 4px;
+    }
+
+    .message.system {
+      background: rgba(17,24,39,0.85);
+      color: #f9fafb;
+      border: 1px solid rgba(156,163,175,0.7);
+      align-self: flex-start;
+    }
+
+    .message.user {
+      background: rgba(37,99,235,0.9);
+      color: #f9fafb;
+      border: 1px solid rgba(59,130,246,0.9);
+      align-self: flex-end;
+    }
+
+    /* AskFoundation hybrid subtitle zone (bottom 20% of avatar) */
+    .subtitle-zone {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 20%;
+      background: linear-gradient(to top, rgba(0,0,0,0.35), rgba(0,0,0,0));
+      display: flex;
+      align-items: flex-end;
+      padding: 6px 10px;
+      pointer-events: none;
+    }
+
+    .subtitle-text {
+      width: 100%;
+      border-top: 1px solid rgba(74,243,255,0.7);
+      padding-top: 4px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #f9fafb;
+      text-align: center;
+      text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+      letter-spacing: 0.02em;
+    }
+
+    /* TikTok-style floating icons (AskFoundation version) */
+    .floating-icons {
+      position: absolute;
+      right: 8px;
+      top: 20%;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .floating-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(148,163,184,0.9);
+      background: rgba(17,24,39,0.85);
+      color: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 0 6px rgba(0,0,0,0.4);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .floating-icon:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(74,243,255,0.8);
+    }
+
+    /* Bottom message bar (~3cm) */
+    .message-bar-row {
+      height: 113px; /* approx 3cm */
+      padding: 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: #ffffff;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    /* AskPCDoctor Message Bar */
+    .message-bar {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      background: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 999px;
+      padding: 6px 12px;
+      box-shadow: inset 0 0 0 1px rgba(74,243,255,0.4);
+      transition: box-shadow 0.2s ease;
+    }
+
+    .message-bar:focus-within {
+      box-shadow: 0 0 8px 2px rgba(74,243,255,0.8);
+    }
+
+    .message-bar input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 0.85rem;
+      color: #111827;
+      background: transparent;
+    }
+
+    .message-bar input::placeholder {
+      color: #6b7280;
+      letter-spacing: 0.03em;
+    }
+
+    .msg-icons {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .msg-icon {
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      cursor: pointer;
+      color: #374151;
+      transition: transform 0.15s ease;
+    }
+
+    .msg-icon:hover {
+      transform: scale(1.15);
+    }
+
+    .input-row button {
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: none;
+      background: #2563eb;
+      color: #f9fafb;
+      font-size: 0.8rem;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .input-row button:hover {
+      background: #1d4ed8;
+    }
+
+    /* Timer + support bar */
+    .footer-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #4b5563;
+    }
+
+    .timer-pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid #9ca3af;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .timer-pill span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    .timer-pill.warning span.dot {
+      background: #facc15;
+    }
+
+    .timer-pill.danger span.dot {
+      background: #ef4444;
+    }
+
+    .countdown {
+      font-weight: 600;
+    }
+
+    .support-link {
+      cursor: pointer;
+      color: #2563eb;
+    }
+
+    .support-link:hover {
+      text-decoration: underline;
+    }
+
+    .hidden { display: none; }
+
+    /* Resize handle (bottom-right corner) */
+    .resize-handle {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      right: 4px;
+      bottom: 4px;
+      border-radius: 3px;
+      border: 1px solid #9ca3af;
+      background: #e5e7eb;
+      cursor: nwse-resize;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="floating-panel" id="floatingPanel">
+    <div class="title-bar" id="titleBar">
+      <div class="title-text">ASKPCDOCTOR • FRONTLINE SUPPORT</div>
+      <div class="window-controls">
+        <div class="win-btn" id="btnExpand">↗</div>
+        <div class="win-btn" id="btnMin">–</div>
+        <div class="win-btn" id="btnRestore">□</div>
+        <div class="win-btn close" id="btnClose">✕</div>
+      </div>
+    </div>
 
-  <div id="apc-panel">
-    <div id="apc-status">Loading...</div>
-    <img id="apc-avatar" src="Assets/logo.png" alt="Avatar">
+    <div class="content">
+      <!-- Top: avatar + chat + subtitles + icons -->
+      <div class="avatar-area">
+        <div class="avatar-portrait">
+          <!-- Replace with your real portrait -->
+          <img src="https://via.placeholder.com/400x600.png?text=Nick" alt="Nick Portrait" />
+        </div>
 
-    <div id="apc-subtitle"></div>
+        <!-- Breathing + blinking overlay -->
+        <div class="avatar-overlay">
+          <div class="avatar-face">
+            <div class="avatar-eyes">
+              <div class="eye"></div>
+              <div class="eye"></div>
+            </div>
+            <div class="avatar-name-tag">Nick • AskPCDoctor</div>
+          </div>
+        </div>
 
-    <div id="apc-input-area">
-      <input id="apc-input" type="text" placeholder="Ask a question...">
-      <button id="apc-send">Send</button>
+        <!-- Flags overlay -->
+        <div class="flag-strip" id="flagStrip">
+          <button class="flag-button" data-lang="en">
+            <span class="flag" style="background-image:url('https://flagcdn.com/gb.svg');"></span>
+            UK
+          </button>
+          <button class="flag-button" data-lang="fr">
+            <span class="flag" style="background-image:url('https://flagcdn.com/fr.svg');"></span>
+            FR
+          </button>
+          <button class="flag-button" data-lang="de">
+            <span class="flag" style="background-image:url('https://flagcdn.com/de.svg');"></span>
+            DE
+          </button>
+          <button class="flag-button" data-lang="es">
+            <span class="flag" style="background-image:url('https://flagcdn.com/es.svg');"></span>
+            ESP
+          </button>
+          <button class="flag-button" data-lang="it">
+            <span class="flag" style="background-image:url('https://flagcdn.com/it.svg');"></span>
+            IT
+          </button>
+          <button class="flag-button" data-lang="moon">
+            <span class="flag" style="background-image:url('https://via.placeholder.com/20x12.png?text=🌕');"></span>
+            Moon
+          </button>
+          <button class="flag-button" data-lang="mars">
+            <span class="flag" style="background-image:url('https://via.placeholder.com/20x12.png?text=🔴');"></span>
+            Mars
+          </button>
+        </div>
+
+        <!-- Chat + subtitle layer -->
+        <div class="chat-layer" id="chatLayer">
+          <div class="chat-window" id="chatWindow"></div>
+        </div>
+
+        <!-- Subtitle zone -->
+        <div class="subtitle-zone">
+          <div class="subtitle-text" id="subtitleText">
+            <!-- Example subtitle -->
+            Welcome to AskPCDoctor — your dedicated technology support assistant.
+          </div>
+        </div>
+
+        <!-- Floating icons (AskFoundation map icons) -->
+        <div class="floating-icons">
+          <div class="floating-icon" title="Support map">🗺️</div>
+          <div class="floating-icon" title="Diagnostics">🛠️</div>
+          <div class="floating-icon" title="History">📜</div>
+        </div>
+
+        <!-- Resize handle -->
+        <div class="resize-handle" id="resizeHandle"></div>
+      </div>
+
+      <!-- Bottom: message bar + timer/support -->
+      <div class="message-bar-row">
+        <div class="input-row" id="inputRow">
+          <div class="message-bar">
+            <input type="text" id="textInput" placeholder="Message AskPCDoctor" />
+            <div class="msg-icons">
+              <div class="msg-icon glasses" title="Search / inspect">👓</div>
+              <div class="msg-icon mic" title="Talk">🎤</div>
+            </div>
+          </div>
+          <button id="sendButton">Send</button>
+        </div>
+
+        <div class="footer-bar">
+          <div class="timer-pill" id="timerPill">
+            <span class="dot"></span>
+            <span id="timerLabel">Session not started</span>
+            <span class="countdown hidden" id="countdownLabel"></span>
+          </div>
+          <div>
+            <span>Have a support agreement?</span>
+            <span class="support-link" id="supportLink">Enter details</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
+  <script>
+    const panel = document.getElementById('floatingPanel');
+    const titleBar = document.getElementById('titleBar');
+    const resizeHandle = document.getElementById('resizeHandle');
+    const flagStrip = document.getElementById('flagStrip');
+    const chatLayer = document.getElementById('chatLayer');
+    const chatWindow = document.getElementById('chatWindow');
+    const textInput = document.getElementById('textInput');
+    const sendButton = document.getElementById('sendButton');
+    const timerPill = document.getElementById('timerPill');
+    const timerLabel = document.getElementById('timerLabel');
+    const countdownLabel = document.getElementById('countdownLabel');
+    const supportLink = document.getElementById('supportLink');
+    const subtitleText = document.getElementById('subtitleText');
+
+    const btnExpand = document.getElementById('btnExpand');
+    const btnMin = document.getElementById('btnMin');
+    const btnRestore = document.getElementById('btnRestore');
+    const btnClose = document.getElementById('btnClose');
+
+    let dragging = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    let resizing = false;
+    let startWidth = 0;
+    let startHeight = 0;
+    let startMouseX = 0;
+    let startMouseY = 0;
+
+    let userName = null;
+    let sessionStarted = false;
+    let totalSeconds = 10 * 60;
+    let remainingSeconds = totalSeconds;
+    let timerInterval = null;
+
+    function addMessage(text, type = 'system') {
+      const msg = document.createElement('div');
+      msg.className = `message ${type}`;
+      msg.textContent = text;
+      chatWindow.appendChild(msg);
+      chatWindow.scrollTop = chatWindow.scrollHeight;
+      subtitleText.textContent = text; // simple subtitle sync for now
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function startSessionTimer() {
+      if (sessionStarted) return;
+      sessionStarted = true;
+      remainingSeconds = totalSeconds;
+      timerLabel.textContent = `Complimentary support: ${formatTime(remainingSeconds)} remaining`;
+      countdownLabel.classList.add('hidden');
+      timerPill.classList.remove('warning', 'danger');
+
+      timerInterval = setInterval(() => {
+        remainingSeconds--;
+        const pct = remainingSeconds / totalSeconds;
+
+        if (pct <= 0.3 && pct > 0.166 && !timerPill.classList.contains('warning')) {
+          timerPill.classList.add('warning');
+          addMessage(
+            "Just a gentle reminder: your complimentary support time is nearing its end. " +
+            "You can continue free if you have a support agreement, or extend with time tokens or a subscription.",
+            'system'
+          );
+        }
+
+        if (remainingSeconds === 60) {
+          timerPill.classList.add('danger');
+          addMessage(
+            "You’re entering the final 60 seconds of your complimentary support. " +
+            "If you’d like to continue, you can enter your support agreement details or purchase additional time.",
+            'system'
+          );
+        }
+
+        if (remainingSeconds <= 10 && remainingSeconds > 0) {
+          countdownLabel.classList.remove('hidden');
+          countdownLabel.textContent = `• ${remainingSeconds}s`;
+        }
+
+        if (remainingSeconds <= 0) {
+          clearInterval(timerInterval);
+          timerLabel.textContent = "Complimentary support time has ended.";
+          countdownLabel.classList.add('hidden');
+          addMessage(
+            "Your complimentary support session has finished. " +
+            "If you have a support agreement, enter your name, support number, and email for continued free support. " +
+            "Otherwise, you can purchase time tokens or a subscription to extend your support.",
+            'system'
+          );
+        } else {
+          timerLabel.textContent = `Complimentary support: ${formatTime(remainingSeconds)} remaining`;
+        }
+      }, 1000);
+    }
+
+    function showInitialWelcome() {
+      addMessage(
+        "Hello, my name is Nick from AskPCDoctor.\n" +
+        "I’m here to support you on your technology journey — simple or complex.\n" +
+        "What’s your name? You can type it, or say it if your microphone is enabled.",
+        'system'
+      );
+
+      addMessage(
+        "You currently have up to 10 minutes to ask us simple to really complex technology questions. " +
+        "If you have a support agreement with us, you can enter your Name (first name will do!), email address and a support number to access your free access entitlement.",
+        'system'
+      );
+
+      startSessionTimer();
+    }
+
+    function handleUserInput() {
+      const value = textInput.value.trim();
+      if (!value) return;
+
+      addMessage(value, 'user');
+
+      if (!userName) {
+        userName = value;
+        addMessage(`Nice to meet you, ${userName}.`, 'system');
+        addMessage(
+          "Whether you’re on Earth battling with your PC at home, " +
+          "in orbit fixing a satellite, on Moonbase Alpha, or ultimately ‘Mars One’, we’re here to help you.",
+          'system'
+        );
+        addMessage("How can I support you today?", 'system');
+        textInput.value = '';
+        return;
+      }
+
+      addMessage(
+        "Thank you for your question. In this demo, responses are simulated. " +
+        "In production, this is where the AskPCDoctor engine would respond.",
+        'system'
+      );
+      textInput.value = '';
+    }
+
+    // Dragging
+    titleBar.addEventListener('mousedown', (e) => {
+      dragging = true;
+      dragOffsetX = e.clientX - panel.offsetLeft;
+      dragOffsetY = e.clientY - panel.offsetTop;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (dragging) {
+        panel.style.left = `${e.clientX - dragOffsetX}px`;
+        panel.style.top = `${e.clientY - dragOffsetY}px`;
+      }
+      if (resizing) {
+        const dx = e.clientX - startMouseX;
+        const dy = e.clientY - startMouseY;
+        let newWidth = startWidth + dx;
+        let newHeight = startHeight + dy;
+
+        const minWidth = 302 * 0.5;
+        const minHeight = 567 * 0.5;
+        const maxWidth = 302 * 1.5;
+        const maxHeight = 567 * 1.5;
+
+        newWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+        newHeight = Math.max(minHeight, Math.min(maxHeight, newHeight));
+
+        panel.style.width = `${newWidth}px`;
+        panel.style.height = `${newHeight}px`;
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      dragging = false;
+      resizing = false;
+    });
+
+    // Resizing
+    resizeHandle.addEventListener('mousedown', (e) => {
+      e.stopPropagation();
+      resizing = true;
+      startWidth = panel.offsetWidth;
+      startHeight = panel.offsetHeight;
+      startMouseX = e.clientX;
+      startMouseY = e.clientY;
+    });
+
+    // Window controls
+    btnClose.addEventListener('click', () => {
+      panel.style.display = 'none';
+    });
+
+    btnMin.addEventListener('click', () => {
+      panel.style.height = '32px';
+    });
+
+    btnRestore.addEventListener('click', () => {
+      panel.style.width = '302px';
+      panel.style.height = '567px';
+    });
+
+    btnExpand.addEventListener('click', () => {
+      panel.style.width = '453px';
+      panel.style.height = '850px';
+    });
+
+    // Flags behaviour
+    flagStrip.addEventListener('click', (e) => {
+      const btn = e.target.closest('.flag-button');
+      if (!btn) return;
+
+      flagStrip.classList.add('slide-right');
+      setTimeout(() => {
+        flagStrip.classList.add('hidden');
+        chatLayer.style.pointerEvents = 'auto';
+        showInitialWelcome();
+      }, 500);
+    });
+
+    // Input + support link
+    sendButton.addEventListener('click', handleUserInput);
+    textInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleUserInput();
+    });
+
+    supportLink.addEventListener('click', () => {
+      addMessage(
+        "Support agreement entry:\n" +
+        "Please provide your name, support number, and email address. " +
+        "Once validated, your access continues without time limits.",
+        'system'
+      );
+    });
+  </script>
 </body>
 </html>
