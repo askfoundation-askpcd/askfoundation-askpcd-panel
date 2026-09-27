@@ -1,0 +1,39 @@
+/* ================================
+   AskPCDoctor Rev1.5 — Layout
+   ================================ */
+
+body {
+  margin: 0;
+  background: var(--foundation-black);
+  color: var(--clarity-white);
+  font-family: var(--font-main);
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.top-nav {
+  background: var(--charcoal-black);
+  padding: var(--space-md);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  box-shadow: var(--shadow-soft);
+}
+
+.main-zone {
+  flex: 1;
+  display: flex;
+  gap: var(--space-lg);
+  padding: var(--space-lg);
+}
+
+.footer-bar {
+  background: var(--charcoal-black);
+  padding: var(--space-md);
+  text-align: center;
+  font-size: var(--font-size-sm);
+  opacity: 0.7;
+}

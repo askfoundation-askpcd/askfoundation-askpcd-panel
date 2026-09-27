@@ -1,0 +1,47 @@
+/* ================================
+   AskPCDoctor Rev1.5 — Variables
+   ================================ */
+
+:root {
+  /* Core Brand Colours */
+  --foundation-black: #0A0A0A;
+  --slate-black: #121212;
+  --charcoal-black: #1A1A1A;
+  --panel-black: #161616;
+
+  --focused-blue: #1E3A8A;
+  --focused-blue-light: #3B5FCC;
+
+  --clarity-white: #FFFFFF;
+  --clarity-grey: #D0D0D0;
+
+  /* Accent */
+  --success-green: #4CAF50;
+  --warning-yellow: #F5C542;
+  --error-red: #E53935;
+
+  /* Spacing Scale */
+  --space-xxs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-xxl: 48px;
+
+  /* Radii */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+
+  /* Shadows */
+  --shadow-soft: 0 2px 6px rgba(0,0,0,0.25);
+  --shadow-medium: 0 4px 12px rgba(0,0,0,0.35);
+
+  /* Typography */
+  --font-main: 'Segoe UI', sans-serif;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 28px;
+}

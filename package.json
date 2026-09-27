@@ -1,8 +1,18 @@
 {
+  "name": "askpcdoctor-rev1-5",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
-    "dotenv": "^18.0.1",
-    "express": "^5.2.1",
-    "stripe": "^22.6.2",
-    "xlsx": "^0.18.5"
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.0",
+    "vite": "^5.0.0"
   }
 }

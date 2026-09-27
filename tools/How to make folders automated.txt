@@ -1,0 +1,9 @@
+mkdir src, src\components, src\components\AvatarPanel, src\components\DiagnosticPanel, src\components\Layout, src\components\Shared, src\styles, src\assets, src\assets\avatar, src\assets\icons, src\assets\fonts, src\demo-backend
+
+ni src\styles\variables.css -ItemType File
+ni src\styles\layout.css -ItemType File
+ni src\styles\components.css -ItemType File
+ni src\styles\motion.css -ItemType File
+
+ni src\demo-backend\diagnose.js -ItemType File
+ni src\App.js -ItemType File
